@@ -121,3 +121,71 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# This section is for setting up a CronJob that creates dummy text files
+cronjob:
+  enabled: true
+  name: dummy-text-generator
+  # Run every 5 minutes - adjust as needed
+  schedule: "*/5 * * * *"
+  
+  # CronJob specific settings
+  concurrencyPolicy: "Forbid"  # Prevent overlapping jobs
+  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 3
+  suspend: false
+  
+  # Job template settings
+  restartPolicy: "OnFailure"
+  activeDeadlineSeconds: 300  # 5 minutes timeout
+  backoffLimit: 3
+  
+  # Container configuration
+  image:
+    repository: alpine
+    tag: "3.18"
+    pullPolicy: IfNotPresent
+  
+  # Command to create dummy text with timestamp
+  command:
+    - "/bin/sh"
+    - "-c"
+  args:
+    - |
+      echo "Creating dummy text file at $(date)"
+      mkdir -p /tmp/dummy-files
+      echo "This is a dummy text file created at $(date)" > /tmp/dummy-files/dummy-$(date +%Y%m%d-%H%M%S).txt
+      echo "File created successfully!"
+      ls -la /tmp/dummy-files/
+      echo "Contents of the file:"
+      cat /tmp/dummy-files/dummy-$(date +%Y%m%d-%H%M%S).txt || echo "File already processed"
+  
+  # Optional environment variables
+  env: []
+  # - name: DUMMY_PREFIX
+  #   value: "test"
+  
+  # Resource limits
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+  
+  # Security context
+  securityContext: {}
+  
+  # Pod annotations and labels
+  podAnnotations: {}
+  podLabels: {}
+  
+  # Volume mounts and volumes (if needed for persistent storage)
+  volumeMounts: []
+  volumes: []
+  
+  # Node selection
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
